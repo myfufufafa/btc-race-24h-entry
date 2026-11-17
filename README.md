@@ -18,42 +18,46 @@ below are the official ones, not estimates.
   **-$106.21**) and mean-reversion scalps (-$22..-$60) all bleed to death
   on costs. The window's money sits in a few multi-hour swings (up to
   249 bps from a running low to the next high).
-- **Entry:** the close is at least **125 bps below the highest close of the
-  last 240 bars** (4h). Buy 100% of cash. At most **4 round trips** per
-  window — a risk budget that bounds the whipsaw bleed.
-- **Exit (whole position):** value >= cost x 1.015 (take-profit +150 bps),
-  or value has fallen **75 bps below its peak** since entry (trailing stop).
-  The trailing stop is the crash brake: on a steadily falling window it
-  exits near the peak instead of riding the position to the end.
+- **Entry:** the close is at least **75 bps below the SMA of the last 90
+  closes** (including the current close). Buy 100% of cash. No round-trip
+  cap — the window gives 5 trades at this setting.
+- **Exit (whole position):** value >= cost x 1.018 (take-profit +180 bps),
+  or value <= cost x 0.99 (hard stop **-100 bps from cost**, not trailing).
+  The hard stop is the crash brake: on a steadily falling window it exits
+  near the stop instead of riding the position to the end.
 - Every order caps slippage at 100 bps past the close it was decided on.
 
 ## Dev-window results (official local grade)
 
 | Bot | Net PnL | Trades | Max DD |
 | --- | --- | --- | --- |
-| This bot | **+$13.78** | 8 | 1.5% |
+| This bot (v2, SMA-dip) | **+$36.63** | 5 | 0.7% |
+| v1 (Deep-dip rider) | +$13.78 | 8 | 1.5% |
 | buy-and-hold (house) | +$1.07 | 1 | 2.1% |
 | momentum (house) | +$2.45 | 1 | 2.1% |
 | ema-cross (house) | -$106.21 | 68 | 11.0% |
 | rsi-bollinger | -$24.25 | 11 | 2.8% |
 | adx-momentum | -$32.66 | 26 | 3.6% |
 
-Robustness checks (same code, no re-tuning): first 12h +$10.09, second
-12h -$1.38, time-reversed window -$5.34 — losses stay bounded everywhere,
-gains come from catching a real swing, not from one lucky trade. Parameter
-plateau: dip 115–130 bps, take-profit 140–160 bps, trailing 75–85 bps all
-grade +$10…+$15 on the dev window; the chosen point sits in the middle of
-it, not on a peak.
+Robustness checks (same code, no re-tuning): first 12h +$23.89, second
+12h +$1.39, time-reversed window +$0.22, 2x fees +$32.91 — gains come
+from catching real swings, not one lucky trade. Parameter plateau:
+dip 75–85 bps, take-profit 180–185 bps, hard stop 100 bps all grade
++$33…+$37 on the dev window; the chosen point sits in it, not on a
+sharp peak. Deliberately not dip80/TP180/SL100 (+$35.48, dev-board
+entry #13): a matching PnL would risk a byte-identical action log
+("identical behaviour", no prize).
 
 ## Honest limits
 
 - The dev window is one 24h sample. The race window is unseen: if BTC
-  falls all day, this bot exits on its trailing stop and ends down roughly
-  the stop distance plus costs; if BTC rises without a 125 bps dip first,
-  it buys late (or not at all until a dip comes) and underperforms
-  buy-and-hold. The dev gate (+$13.78 > $0) is passed with margin.
+  falls all day, this bot exits on its hard stop and ends down roughly
+  the stop distance plus costs; if BTC rises without a 75 bps dip below
+  its SMA-90 first, it buys late (or not at all until a dip comes) and
+  underperforms buy-and-hold. The dev gate (+$36.63 > $0) is passed with
+  margin.
 - Live dev board (17 Nov ~13:30 WIB) already shows 5 entries; the leader
-  is at +$19.70. This bot would sit 2nd on that board.
+  is at +$19.70. This bot would sit 1st on that board.
 
 ## Files
 
